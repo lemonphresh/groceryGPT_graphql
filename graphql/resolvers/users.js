@@ -18,7 +18,6 @@ module.exports = {
         );
       }
 
-      // should i encrypt the email too?
       const encryptedPassword = await bcrypt.hash(password, 10);
 
       const newUser = new User({
@@ -42,21 +41,19 @@ module.exports = {
       newUser.token = token;
 
       const res = await newUser.save();
-      // todo: remove these console logs
-      console.log(res);
 
       return {
-        id: res.id,
+        id: res._id,
         ...res._doc,
       };
     },
     async loginUser(_, { loginInput: { email, password } }) {
       const user = await User.findOne({ email });
 
-      if (user && (await bcrypt.compare(password, user.model))) {
+      if (user && (await bcrypt.compare(password, user.password))) {
         const token = jwt.sign(
           {
-            user_id: newUser._id,
+            user_id: user._id,
             email,
           },
           jwtKey,
@@ -68,8 +65,8 @@ module.exports = {
         user.token = token;
 
         return {
-          id: user.id,
-          ...res._doc,
+          id: user._id,
+          ...user._doc,
         };
       }
 
