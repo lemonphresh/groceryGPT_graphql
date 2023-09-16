@@ -2,9 +2,9 @@ const dotenv = require("dotenv");
 dotenv.config();
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
-const typeDefs = require("../graphql/typeDefs");
-const resolvers = require("../graphql/resolvers");
-const { sequelize } = require("../models");
+const typeDefs = require("./graphql/typeDefs");
+const resolvers = require("./graphql/resolvers");
+const { sequelize } = require("./models");
 
 const PORT = process.env.PORT || 4000;
 
