@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
 dotenv.config();
-const { user } = require("../../models/user");
+const User = require("../../models/user.js");
 const { ApolloError } = require("apollo-server-errors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -10,7 +10,7 @@ const jwtKey = process.env.JWT;
 module.exports = {
   Mutation: {
     async registerUser(_, { registerInput: { email, password, username } }) {
-      const oldUser = await user(sequelize).findAll({ where: { email } });
+      const oldUser = await User(sequelize).findAll({ where: { email } });
 
       if (oldUser) {
         throw new ApolloError(
@@ -21,7 +21,7 @@ module.exports = {
 
       const encryptedPassword = await bcrypt.hash(password, 10);
 
-      const newUser = new user(sequelize)({
+      const newUser = new User(sequelize)({
         username,
         email: email.toLowerCase(),
         password: encryptedPassword,
@@ -49,12 +49,12 @@ module.exports = {
       };
     },
     async loginUser(_, { loginInput: { email, password } }) {
-      const foundUser = await user(sequelize).findOne({ email });
+      const user = await User(sequelize).findOne({ email });
 
-      if (foundUser && (await bcrypt.compare(password, foundUser.password))) {
+      if (user && (await bcrypt.compare(password, user.password))) {
         const token = jwt.sign(
           {
-            user_id: foundUser._id,
+            user_id: user._id,
             email,
           },
           jwtKey,
@@ -63,11 +63,11 @@ module.exports = {
           }
         );
 
-        foundUser.token = token;
+        user.token = token;
 
         return {
-          id: foundUser._id,
-          ...foundUser._doc,
+          id: user._id,
+          ...user._doc,
         };
       }
 
@@ -75,6 +75,6 @@ module.exports = {
     },
   },
   Query: {
-    user: (_, { ID }) => user.findById(ID),
+    user: (_, { ID }) => User.findById(ID),
   },
 };
