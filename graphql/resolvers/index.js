@@ -1,13 +1,10 @@
-const ingredients = require("./ingredients");
-const users = require("./users");
+const User = require("./users");
 
 module.exports = {
   Query: {
-    ...ingredients.Query,
-    ...users.Query,
+    ...User.Query,
   },
   Mutation: {
-    ...ingredients.Mutation,
-    ...users.Mutation,
+    ...User.Mutation,
   },
 };
