@@ -40,7 +40,6 @@ module.exports = (sequelize) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          len: [7, 42],
         },
       },
       token: DataTypes.STRING,

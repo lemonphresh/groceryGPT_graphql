@@ -1,0 +1,10 @@
+{
+  "development": {
+    "use_environment_variable": "DATABASE_URL",
+    "dialect": "postgres"
+  },
+  "production": {
+    "use_environment_variable": "DATABASE_URL",
+    "dialect": "postgres"
+  }
+}

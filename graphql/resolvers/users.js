@@ -11,8 +11,8 @@ module.exports = {
   Mutation: {
     async registerUser(_, { registerInput: { email, password, username } }) {
       const oldUser = await User(sequelize).findAll({ where: { email } });
-
-      if (oldUser) {
+      console.log(oldUser);
+      if (oldUser.length !== 0) {
         throw new ApolloError(
           `A user is already registered with the email ${email}.`,
           "USER_ALREADY_EXISTS"
@@ -21,7 +21,7 @@ module.exports = {
 
       const encryptedPassword = await bcrypt.hash(password, 10);
 
-      const newUser = new User(sequelize)({
+      const newUser = await User(sequelize).create({
         username,
         email: email.toLowerCase(),
         password: encryptedPassword,
@@ -41,12 +41,8 @@ module.exports = {
 
       newUser.token = token;
 
-      const res = await newUser.save();
-
-      return {
-        id: res._id,
-        ...res._doc,
-      };
+      console.log(newUser);
+      return newUser;
     },
     async loginUser(_, { loginInput: { email, password } }) {
       const user = await User(sequelize).findOne({ email });
@@ -65,10 +61,7 @@ module.exports = {
 
         user.token = token;
 
-        return {
-          id: user._id,
-          ...user._doc,
-        };
+        return user;
       }
 
       throw new ApolloError("Incorrect password.", "INCORRECT_PASSWORD");
