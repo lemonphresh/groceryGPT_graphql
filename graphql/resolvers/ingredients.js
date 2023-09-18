@@ -1,13 +1,11 @@
 const dotenv = require("dotenv");
 dotenv.config();
-const Ingredient = require("../../models/ingredient.js");
-const { sequelize } = require("../../models");
+const { Ingredient } = require("../../models");
 
-const jwtKey = process.env.JWT;
 module.exports = {
   Mutation: {
     async deleteIngredient(_, { deleteIngredientInput: { name, userId } }) {
-      Ingredient(sequelize).destroy({
+      Ingredient.destroy({
         where: {
           name,
           userId,
@@ -16,6 +14,44 @@ module.exports = {
 
       return "ok";
     },
+    async editUserIngredients(
+      _,
+      { editUserIngredientsInput: { input, userId } }
+    ) {
+      input
+        .split(",")
+        .forEach(
+          async (item) => await Ingredient.create({ name: item.trim(), userId })
+        );
+
+      const updatedIngredientsList = await Ingredient.findAll({
+        where: {
+          userId: userId,
+        },
+      });
+
+      return updatedIngredientsList;
+    },
+    async clearUserIngredients(_, { clearUserIngredientsInput: { userId } }) {
+      const ingredientsList = await Ingredient.findAll({
+        where: {
+          userId: userId,
+        },
+      });
+
+      ingredientsList.forEach(() => Ingredient.destroy({ where: { userId } }));
+
+      return "ok";
+    },
   },
-  Query: {},
+  Query: {
+    async getIngredientsByUser(_, { userId }) {
+      const list = await Ingredient.findAll({
+        where: {
+          userId,
+        },
+      });
+      return list;
+    },
+  },
 };

@@ -1,16 +1,10 @@
 const typeDefs = `#graphql
-  type Ingredient {
-    name: String
-    userId: ID!
-  }
-
   type User {
     id: ID!
     username: String
     email: String
     password: String
     token: String
-    ingredients: [Ingredient]
   }
 
   input RegisterInput {
@@ -23,6 +17,11 @@ const typeDefs = `#graphql
   input LoginInput {
     email: String
     password: String
+  }
+
+  type Ingredient {
+    name: String
+    userId: ID!
   }
 
   input EditUserIngredientsInput {
@@ -41,13 +40,13 @@ const typeDefs = `#graphql
 
   type Query {
     user(id: ID!): User
-    getUserIngredientsList(id: ID!): User
+    getIngredientsByUser(userId: ID!): [Ingredient]
   }
 
   type Mutation {
-    clearUserIngredients(clearUserIngredientsInput: ClearUserIngredientsInput): User
+    clearUserIngredients(clearUserIngredientsInput: ClearUserIngredientsInput): String
     deleteIngredient(deleteIngredientInput: DeleteIngredientInput): String
-    editUserIngredients(editUserIngredientsInput: EditUserIngredientsInput): User
+    editUserIngredients(editUserIngredientsInput: EditUserIngredientsInput): [Ingredient]
     loginUser(loginInput: LoginInput): User
     registerUser(registerInput: RegisterInput): User
   }

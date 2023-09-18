@@ -13,7 +13,7 @@ const server = new ApolloServer({
   resolvers,
 });
 
-sequelize.sync({ force: true }).then(async () => {
+sequelize.sync().then(async () => {
   await startStandaloneServer(server, {
     listen: { port: PORT },
   });

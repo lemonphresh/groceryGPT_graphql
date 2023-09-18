@@ -1,17 +1,15 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const { ApolloError } = require("apollo-server-errors");
-const User = require("../../models/user");
-const Ingredient = require("../../models/ingredient");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sequelize } = require("../../models");
+const { User, Ingredient } = require("../../models");
 
 const jwtKey = process.env.JWT;
 module.exports = {
   Mutation: {
     async registerUser(_, { registerInput: { email, password, username } }) {
-      const oldUser = await User(sequelize).findAll({ where: { email } });
+      const oldUser = await User.findAll({ where: { email } });
 
       if (oldUser.length !== 0) {
         throw new ApolloError(
@@ -22,7 +20,7 @@ module.exports = {
 
       const encryptedPassword = await bcrypt.hash(password, 10);
 
-      const newUser = await User(sequelize).create({
+      const newUser = await User.create({
         username,
         email: email.toLowerCase(),
         password: encryptedPassword,
@@ -45,7 +43,7 @@ module.exports = {
       return newUser;
     },
     async loginUser(_, { loginInput: { email, password } }) {
-      const user = await User(sequelize).findOne({ email });
+      const user = await User.findOne({ email });
 
       if (user && (await bcrypt.compare(password, user.password))) {
         const token = jwt.sign(
@@ -72,52 +70,31 @@ module.exports = {
     ) {
       input
         .split(",")
-        .forEach((item) =>
-          Ingredient.create({ name: item.trim(), userId: userId })
-        );
+        .forEach((item) => Ingredient.create({ name: item.trim(), userId }));
 
-      const updatedIngredientsList = await Ingredient(sequelize).findAll({
+      const updatedIngredientsList = await Ingredient.findAll({
         where: {
           userId: userId,
         },
       });
 
-      return {
-        id: userId,
-        ingredients: updatedIngredientsList,
-      };
+      return updatedIngredientsList;
     },
     async clearUserIngredients(_, { clearUserIngredientsInput: { userId } }) {
-      const ingredientsList = await Ingredient(sequelize).findAll({
+      const ingredientsList = await Ingredient.findAll({
         where: {
           userId: userId,
         },
       });
 
-      ingredientsList.forEach(() =>
-        Ingredient(sequelize).destroy({ where: { userId } })
-      );
+      ingredientsList.forEach(() => Ingredient.destroy({ where: { userId } }));
 
-      return {
-        id: userId,
-        ingredients: null,
-      };
+      return "ok";
     },
   },
   Query: {
     async user(_, { id }) {
-      return await User(sequelize).findByPk(id);
-    },
-    async getUserIngredientsList(_, { id }) {
-      // for the love of god please help
-      const user = await User(sequelize).findOne({
-        where: {
-          id,
-        },
-        include: [{ model: Ingredient(sequelize), as: "ingredients" }],
-      });
-      console.log(user);
-      // return user;
+      return await User.findByPk(id);
     },
   },
 };
