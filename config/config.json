@@ -1,13 +1,10 @@
 {
   "development": {
-    "use_env_variable": "DATABASE_URL",
-    "dialect": "postgres",
-    "dialectOptions": {
-      "ssl": {
-        "require": true,
-        "rejectUnauthorized": false
-      }
-    }
+    "username": "postgres",
+    "password": null,
+    "database": "grocery-gpt",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
   },
   "stage": {
     "use_env_variable": "DATABASE_URL",
