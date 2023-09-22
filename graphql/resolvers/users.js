@@ -29,7 +29,7 @@ module.exports = {
 
       const token = jwt.sign(
         {
-          user_id: newUser._id,
+          id: newUser.id,
           email,
         },
         jwtKey,
@@ -39,17 +39,19 @@ module.exports = {
       );
 
       newUser.token = token;
+      console.log();
 
       return newUser;
     },
     async loginUser(_, { loginInput: { email, password } }) {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ where: { email } });
 
       if (user && (await bcrypt.compare(password, user.password))) {
         const token = jwt.sign(
           {
-            user_id: user._id,
+            id: user.id,
             email,
+            username: user.username,
           },
           jwtKey,
           {
@@ -63,33 +65,6 @@ module.exports = {
       }
 
       throw new ApolloError("Incorrect password.", "INCORRECT_PASSWORD");
-    },
-    async editUserIngredients(
-      _,
-      { editUserIngredientsInput: { input, userId } }
-    ) {
-      input
-        .split(",")
-        .forEach((item) => Ingredient.create({ name: item.trim(), userId }));
-
-      const updatedIngredientsList = await Ingredient.findAll({
-        where: {
-          userId: userId,
-        },
-      });
-
-      return updatedIngredientsList;
-    },
-    async clearUserIngredients(_, { clearUserIngredientsInput: { userId } }) {
-      const ingredientsList = await Ingredient.findAll({
-        where: {
-          userId: userId,
-        },
-      });
-
-      ingredientsList.forEach(() => Ingredient.destroy({ where: { userId } }));
-
-      return "ok";
     },
   },
   Query: {

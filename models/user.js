@@ -12,6 +12,9 @@ module.exports = (sequelize) => {
       User.hasMany(models.Ingredient, {
         foreignKey: "userId",
       });
+      User.hasMany(models.Recipe, {
+        foreignKey: "userId",
+      });
     }
   }
   User.init(
