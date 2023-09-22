@@ -1,17 +1,16 @@
 const dotenv = require("dotenv");
 dotenv.config();
-const User = require("../../models/user.js");
 const { ApolloError } = require("apollo-server-errors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sequelize } = require("../../models");
+const { User, Ingredient } = require("../../models");
 
 const jwtKey = process.env.JWT;
 module.exports = {
   Mutation: {
     async registerUser(_, { registerInput: { email, password, username } }) {
-      const oldUser = await User(sequelize).findAll({ where: { email } });
-      console.log(oldUser);
+      const oldUser = await User.findAll({ where: { email } });
+
       if (oldUser.length !== 0) {
         throw new ApolloError(
           `A user is already registered with the email ${email}.`,
@@ -21,7 +20,7 @@ module.exports = {
 
       const encryptedPassword = await bcrypt.hash(password, 10);
 
-      const newUser = await User(sequelize).create({
+      const newUser = await User.create({
         username,
         email: email.toLowerCase(),
         password: encryptedPassword,
@@ -30,7 +29,7 @@ module.exports = {
 
       const token = jwt.sign(
         {
-          user_id: newUser._id,
+          id: newUser.id,
           email,
         },
         jwtKey,
@@ -40,18 +39,19 @@ module.exports = {
       );
 
       newUser.token = token;
+      console.log();
 
-      console.log(newUser);
       return newUser;
     },
     async loginUser(_, { loginInput: { email, password } }) {
-      const user = await User(sequelize).findOne({ email });
+      const user = await User.findOne({ where: { email } });
 
       if (user && (await bcrypt.compare(password, user.password))) {
         const token = jwt.sign(
           {
-            user_id: user._id,
+            id: user.id,
             email,
+            username: user.username,
           },
           jwtKey,
           {
@@ -68,6 +68,8 @@ module.exports = {
     },
   },
   Query: {
-    user: (_, { ID }) => User.findById(ID),
+    async user(_, { id }) {
+      return await User.findByPk(id);
+    },
   },
 };

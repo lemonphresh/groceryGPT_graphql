@@ -1,9 +1,5 @@
 const typeDefs = `#graphql
-  type Ingredient {
-    list: [String]
-    createdAt: String
-    createdBy: String
-  }
+  scalar Date
 
   type User {
     id: ID!
@@ -11,10 +7,6 @@ const typeDefs = `#graphql
     email: String
     password: String
     token: String
-  }
-
-  input IngredientInput {
-    list: [String]
   }
 
   input RegisterInput {
@@ -29,15 +21,66 @@ const typeDefs = `#graphql
     password: String
   }
 
+  type Ingredient {
+    name: String
+    userId: ID!
+  }
+
+  input EditUserIngredientsInput {
+    input: [String]
+    userId: ID!
+  }
+
+  input ClearUserIngredientsInput {
+    userId: ID!
+  }
+
+  input DeleteIngredientInput {
+    userId: ID!
+    name: String
+  }
+
+  type Recipe {
+    id: ID!
+    name: String
+    userId: ID!
+    link: String
+    createdAt: Date
+  }
+  
+  input DeleteRecipeInput {
+    userId: ID!
+    recipeId: ID!
+  }
+
+  input CreateRecipeInput {
+    userId: ID!
+    name: String
+    link: String
+  }
+
+  input UpdateRecipeNameInput {
+    userId: ID!
+    newName: String
+    recipeId: ID!
+  }
+
   type Query {
-    ingredient(id: ID!): Ingredient
     user(id: ID!): User
+    getIngredientsByUser(userId: ID!): [Ingredient]
+    recipe(id: ID!): Recipe
+    getRecipesByUser(userId: ID!): [Recipe]
   }
 
   type Mutation {
-    createIngredient(ingredientInput: IngredientInput): Ingredient!
+    clearUserIngredients(clearUserIngredientsInput: ClearUserIngredientsInput): String
+    createRecipe(createRecipeInput: CreateRecipeInput): Recipe
+    deleteIngredient(deleteIngredientInput: DeleteIngredientInput): String
+    deleteRecipe(deleteRecipeInput: DeleteRecipeInput): String
+    editUserIngredients(editUserIngredientsInput: EditUserIngredientsInput): [Ingredient]
     loginUser(loginInput: LoginInput): User
     registerUser(registerInput: RegisterInput): User
+    updateRecipeName(updateRecipeNameInput: UpdateRecipeNameInput): Recipe
   }
 `;
 
